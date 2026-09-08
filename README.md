@@ -12,16 +12,6 @@ NeCrypt Engine is a C++ command-line prototype for file encryption and decryptio
 
 ---
 
-## 🏷️ Repository Name
-
-Use this repository name for a professional GitHub identity:
-
-- **`necrypt-engine-cpp`** ✅
-
-If your current repo still has an old name, rename it in:
-**GitHub → Settings → General → Repository name**
-
----
 
 ## 📚 Table of Contents
 
