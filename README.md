@@ -1,21 +1,30 @@
-# Necryption Engine (C++ Research Prototype)
+# 🔐 NeCrypt Engine
 
-A command-line C++ prototype for **file encryption/decryption** using a custom multi-stage pipeline that combines byte-level transforms, Huffman coding, and 3D Rubik-style data permutation.
+<p align="left">
+  <img src="https://img.shields.io/badge/C%2B%2B-17-blue.svg" alt="C++17" />
+  <img src="https://img.shields.io/badge/Type-Research%20Prototype-orange.svg" alt="Research Prototype" />
+  <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey.svg" alt="Platform" />
+</p>
 
-> **Important:** This repository is an experimental implementation for learning/research. It is **not** production-grade cryptography.
+NeCrypt Engine is a C++ command-line prototype for file encryption and decryption using a custom multi-stage pipeline: XOR transformation, Huffman encoding, and 3D permutation logic.
+
+> ⚠️ **Security note:** This is an educational/research implementation and is not production-grade cryptography.
 
 ---
 
-## Table of Contents
 
-- [Overview](#overview)
-- [Core Features](#core-features)
+## 📚 Table of Contents
+
+- [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
+- [How It Works](#how-it-works)
+- [Screenshots](#screenshots)
+- [Features](#features)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
 - [Build](#build)
 - [Usage](#usage)
-- [Encryption/Decryption Flow](#encryptiondecryption-flow)
-- [File Format Notes](#file-format-notes)
+- [Output & File Format](#output--file-format)
 - [Current Limitations](#current-limitations)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -23,57 +32,117 @@ A command-line C++ prototype for **file encryption/decryption** using a custom m
 
 ---
 
-## Overview
+## Project Overview ✨
 
-This project implements a custom encryption workflow around these ideas:
+The executable auto-detects mode from the file extension:
 
-1. fixed-size key normalization (1024 bytes)
-2. XOR-based transformation
-3. Huffman tree generation and bitstream handling
-4. mapping data into a 256×256×256 byte cube
-5. dimension-wise cube shifts
-6. prime-index shuffle mapping and reverse operations for decryption
+- **Encrypt mode** for regular files
+- **Decrypt mode** for `.khn` files
 
-The executable automatically selects mode:
+Core stages:
 
-- **Encrypt mode** for normal input files
-- **Decrypt mode** for files ending in `.khn`
+1. Key normalization (1024 bytes)
+2. XOR byte transformation
+3. Huffman tree + bitstream encoding
+4. 256 × 256 × 256 cube mapping
+5. Multi-axis cube shifts
+6. Prime-based shuffling (and reverse for decryption)
 
 ---
 
-## Core Features
+## Tech Stack 🧰
 
-- Binary file input/output support
-- Automatic file size guard (input > 12 MB is rejected)
-- Internal 16 MB processing target via padding
+### Language & Compiler
+- **C++17**
+- **g++**
+
+### Standard Library Usage
+- Containers: `vector`, `unordered_map`, `string`, `queue`
+- File processing: `fstream`, iterators
+- Utilities: `bitset`, `algorithm`, `chrono`, `functional`, `stdexcept`
+
+### Algorithm Components
+- XOR transform
+- Huffman compression/decompression
+- 3D cube permutation
+- Prime index deterministic shuffle
+
+---
+
+## How It Works ⚙️
+
+### ✅ Encryption Flow
+1. Read input bytes
+2. Pad to internal working size
+3. Normalize key
+4. Apply XOR transform
+5. Huffman encode data
+6. Map into 3D cube
+7. Apply cube shifts/permutations
+8. Apply prime-based shuffle
+9. Write encrypted output + metadata
+
+### 🔄 Decryption Flow
+1. Read encrypted metadata + payload
+2. Normalize key
+3. Reverse prime-based shuffle
+4. Reverse cube transformations
+5. Huffman decode
+6. Reverse XOR transform
+7. Remove padding
+8. Write decrypted file
+
+---
+
+## Screenshots 🖼️
+
+### Usage Example
+![Usage Screenshot](assets/screenshots/usage.png)
+
+### Encryption Run
+![Encryption Run Screenshot](assets/screenshots/encryption-run.png)
+
+---
+
+## Features ✅
+
+- Binary-safe input/output handling
+- Single executable for encrypt + decrypt
+- Extension-based mode detection (`.khn`)
 - Automatic output naming:
-  - encryption: `<input>.khn`
-  - decryption: `decrypted_output.<original_extension>`
-- Built-in error handling with terminal messages
+  - Encryption: `<input>.khn`
+  - Decryption: `decrypted_output.<original_extension>`
+- Input validation and size guardrails
+- Command-line status and error messages
 
 ---
 
-## Project Structure
+## Project Structure 📁
 
 ```text
 .
-├── code.cpp       # Main source implementation
-├── code           # Compiled executable (if present)
-├── input.txt      # Sample plain input
-├── input.txt.khn  # Sample encrypted-like file
-└── output.bin     # Artifact / test output file
+├── README.md
+├── code.cpp
+├── code
+├── assets/
+│   └── screenshots/
+│       ├── usage.png
+│       └── encryption-run.png
+├── input.txt
+├── input.txt.khn
+└── output.bin
 ```
 
 ---
 
-## Requirements
+## Requirements 🧪
 
-- Linux/macOS environment (or WSL on Windows)
-- C++17 compatible compiler (`g++` recommended)
+- Linux/macOS (or WSL on Windows)
+- C++17-compatible compiler
 
 ---
 
-## Build
+## Build 🔨
 
 ```bash
 g++ -std=c++17 -O2 code.cpp -o code
@@ -81,7 +150,7 @@ g++ -std=c++17 -O2 code.cpp -o code
 
 ---
 
-## Usage
+## Usage 🚀
 
 ```bash
 ./code <input_file> <key>
@@ -93,8 +162,7 @@ g++ -std=c++17 -O2 code.cpp -o code
 ./code input.txt my-secret-key
 ```
 
-Generates:
-
+Output:
 ```text
 input.txt.khn
 ```
@@ -105,78 +173,52 @@ input.txt.khn
 ./code input.txt.khn my-secret-key
 ```
 
-Generates:
-
+Output:
 ```text
 decrypted_output.<ext>
 ```
 
 ---
 
-## Encryption/Decryption Flow
+## Output & File Format 📦
 
-### Encryption Path
-
-1. Read input as bytes
-2. Pad to 16 MB
-3. Normalize key to 1024 bytes
-4. XOR transform
-5. Build Huffman tree and encode
-6. Load into 3D cube array
-7. Apply row/column/drawer shifts
-8. Apply prime-based shuffle logic
-9. Write encrypted output and metadata
-
-### Decryption Path
-
-1. Parse encrypted file metadata
-2. Normalize key
-3. Reverse shuffle
-4. Reverse cube shifts
-5. Huffman decode
-6. XOR reverse
-7. Recover original metadata + trim padding
-8. Write decrypted file
+Encrypted files include metadata headers required for successful reverse processing.  
+Changing serialization logic may break compatibility with older `.khn` files.
 
 ---
 
-## File Format Notes
+## Current Limitations ⚠️
 
-Encrypted output stores internal metadata (including Huffman-related data) before payload bytes. Decryption relies on this metadata, so format consistency is critical when changing code.
-
----
-
-## Current Limitations
-
-- Single large source file (`code.cpp`) with limited modular separation
-- Experimental algorithm design; not security-audited
-- Memory/runtime characteristics are heavy due to 3D-array and mapping approach
-- Reliability edge cases still need validation and test coverage
+- Single large source file (`code.cpp`)
+- Limited modular separation
+- Limited test coverage
+- Not cryptographically audited
 
 ---
 
-## Roadmap
+## Roadmap 🛣️
 
-- Refactor into clear modules (`io`, `crypto`, `huffman`, `permutation`, `cli`)
-- Add deterministic tests for encrypt/decrypt round-trip
-- Define and document stable `.khn` format versioning
-- Improve performance and memory safety checks
-
----
-
-## Contributing
-
-Contributions are welcome for cleanup, testing, and architecture improvements.
-
-Suggested rules:
-
-- keep changes scoped and reviewable
-- preserve backward compatibility where possible
-- include test evidence for behavior changes
+- Refactor into modules (`io`, `crypto`, `huffman`, `permutation`, `cli`)
+- Add deterministic round-trip tests
+- Introduce `.khn` format versioning
+- Improve performance and memory checks
 
 ---
 
-## License
+## Contributing 🤝
 
-No license file is currently included in this repository.
-If you plan to open-source this project broadly, add a `LICENSE` file (e.g., MIT/Apache-2.0).
+Contributions are welcome for:
+
+- modular refactoring
+- test improvements
+- performance tuning
+- documentation upgrades
+
+Please keep pull requests focused and include clear verification notes.
+
+---
+
+## License 📄
+
+No license file is currently included.  
+To open-source publicly, add a license such as MIT or Apache-2.0.
